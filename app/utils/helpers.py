@@ -29,9 +29,17 @@ async def get_or_create_user_settings(
                 username=username,
             )
             session.add(user_settings)
-            await session.commit()
-            await session.refresh(user_settings)
-            logger.info(f"Создан новый пользователь: {user_id}")
+            try:
+                await session.commit()
+                await session.refresh(user_settings)
+                logger.info(f"Создан новый пользователь: {user_id}")
+            except Exception as commit_error:
+                # Возможно, пользователь был создан в другой сессии
+                await session.rollback()
+                result = await session.execute(stmt)
+                user_settings = result.scalar_one_or_none()
+                if not user_settings:
+                    raise commit_error
         
         return user_settings
     except Exception as e:

@@ -1,4 +1,4 @@
-aiogram==3.3.0
+aiogram==3.4.1
 aiohttp==3.9.1
 psutil==5.9.6
 matplotlib==3.8.2

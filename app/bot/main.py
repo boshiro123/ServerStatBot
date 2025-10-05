@@ -7,7 +7,6 @@ import logging
 import asyncio
 from aiogram import Bot, Dispatcher
 from aiogram.enums import ParseMode
-from aiogram.client.default import DefaultBotProperties
 from dotenv import load_dotenv
 
 # Добавляем корневую директорию в путь
@@ -42,10 +41,7 @@ async def main():
         return
     
     # Инициализация бота и диспетчера
-    bot = Bot(
-        token=bot_token,
-        default=DefaultBotProperties(parse_mode=ParseMode.HTML)
-    )
+    bot = Bot(token=bot_token, parse_mode=ParseMode.HTML)
     dp = Dispatcher()
     
     # Регистрация роутеров

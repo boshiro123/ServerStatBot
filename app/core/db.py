@@ -31,13 +31,24 @@ async_session_maker = async_sessionmaker(
 
 async def init_db():
     """Инициализация базы данных - создание всех таблиц"""
-    try:
-        async with engine.begin() as conn:
-            await conn.run_sync(Base.metadata.create_all)
-        logger.info("База данных успешно инициализирована")
-    except Exception as e:
-        logger.error(f"Ошибка при инициализации БД: {e}")
-        raise
+    import asyncio
+    max_retries = 5
+    retry_delay = 2
+    
+    for attempt in range(max_retries):
+        try:
+            async with engine.begin() as conn:
+                await conn.run_sync(Base.metadata.create_all)
+            logger.info("База данных успешно инициализирована")
+            return
+        except Exception as e:
+            if attempt < max_retries - 1:
+                logger.warning(f"Попытка {attempt + 1}/{max_retries} подключения к БД не удалась: {e}")
+                logger.info(f"Повторная попытка через {retry_delay} секунд...")
+                await asyncio.sleep(retry_delay)
+            else:
+                logger.error(f"Ошибка при инициализации БД после {max_retries} попыток: {e}")
+                raise
 
 
 async def get_session() -> AsyncGenerator[AsyncSession, None]:

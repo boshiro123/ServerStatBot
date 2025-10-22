@@ -48,9 +48,6 @@ services:
       # Монтируем /proc для доступа к метрикам хоста (read-only)
       - /proc:/host/proc:ro
       - /sys:/host/sys:ro
-    # Настройки безопасности
-    security_opt:
-      - no-new-privileges:true
     # Для доступа к метрикам хоста
     pid: "host"
     # Ограничение ресурсов

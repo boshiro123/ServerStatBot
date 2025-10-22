@@ -17,22 +17,6 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
-    # Настройки безопасности
-    security_opt:
-      - no-new-privileges:true
-    cap_drop:
-      - ALL
-    cap_add:
-      - CHOWN
-      - DAC_OVERRIDE
-      - SETGID
-      - SETUID
-      - FOWNER
-      - FSETID
-    read_only: false
-    tmpfs:
-      - /tmp:size=100m
-      - /run:size=10m
     # Ограничение ресурсов
     deploy:
       resources:

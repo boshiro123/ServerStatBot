@@ -51,14 +51,6 @@ services:
     # Настройки безопасности
     security_opt:
       - no-new-privileges:true
-      - seccomp:unconfined # Нужно для pid:host
-    cap_drop:
-      - ALL
-    cap_add:
-      - SYS_PTRACE # Нужно для мониторинга процессов
-    read_only: false # Нужна запись для логов и БД кэша
-    tmpfs:
-      - /tmp:noexec,nosuid,size=100m
     # Для доступа к метрикам хоста
     pid: "host"
     # Ограничение ресурсов

@@ -85,40 +85,6 @@ services:
           cpus: "0.25"
           memory: 128M
 
-  # Adminer для управления БД (опционально)
-  adminer:
-    image: adminer:latest
-    container_name: serverstat_adminer
-    restart: unless-stopped
-    depends_on:
-      - db
-    ports:
-      - "127.0.0.1:8080:8080" # Только localhost
-    environment:
-      ADMINER_DEFAULT_SERVER: db
-    # Настройки безопасности
-    security_opt:
-      - no-new-privileges:true
-    cap_drop:
-      - ALL
-    cap_add:
-      - CHOWN
-      - SETGID
-      - SETUID
-      - NET_BIND_SERVICE
-    read_only: true
-    tmpfs:
-      - /tmp:noexec,nosuid,size=50m
-    # Ограничение ресурсов
-    deploy:
-      resources:
-        limits:
-          cpus: "0.5"
-          memory: 256M
-        reservations:
-          cpus: "0.1"
-          memory: 64M
-
 volumes:
   postgres_data:
     driver: local

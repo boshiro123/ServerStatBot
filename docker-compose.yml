@@ -11,12 +11,35 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
     ports:
-      - "5433:5432"
+      - "127.0.0.1:5433:5432" # Только localhost
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres"]
       interval: 10s
       timeout: 5s
       retries: 5
+    # Настройки безопасности
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    cap_add:
+      - CHOWN
+      - DAC_OVERRIDE
+      - SETGID
+      - SETUID
+    read_only: false
+    tmpfs:
+      - /tmp:noexec,nosuid,size=100m
+      - /run:noexec,nosuid,size=10m
+    # Ограничение ресурсов
+    deploy:
+      resources:
+        limits:
+          cpus: "1.0"
+          memory: 512M
+        reservations:
+          cpus: "0.25"
+          memory: 128M
 
   # Telegram Bot приложение
   app:
@@ -36,12 +59,31 @@ services:
       LOG_LEVEL: ${LOG_LEVEL:-INFO}
     volumes:
       - ./logs:/app/logs
-      # Монтируем /proc для доступа к метрикам хоста
+      # Монтируем /proc для доступа к метрикам хоста (read-only)
       - /proc:/host/proc:ro
       - /sys:/host/sys:ro
+    # Настройки безопасности
+    security_opt:
+      - no-new-privileges:true
+      - seccomp:unconfined # Нужно для pid:host
+    cap_drop:
+      - ALL
+    cap_add:
+      - SYS_PTRACE # Нужно для мониторинга процессов
+    read_only: false # Нужна запись для логов и БД кэша
+    tmpfs:
+      - /tmp:noexec,nosuid,size=100m
     # Для доступа к метрикам хоста
-    privileged: false
     pid: "host"
+    # Ограничение ресурсов
+    deploy:
+      resources:
+        limits:
+          cpus: "1.0"
+          memory: 512M
+        reservations:
+          cpus: "0.25"
+          memory: 128M
 
   # Adminer для управления БД (опционально)
   adminer:
@@ -51,9 +93,31 @@ services:
     depends_on:
       - db
     ports:
-      - "8080:8080"
+      - "127.0.0.1:8080:8080" # Только localhost
     environment:
       ADMINER_DEFAULT_SERVER: db
+    # Настройки безопасности
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    cap_add:
+      - CHOWN
+      - SETGID
+      - SETUID
+      - NET_BIND_SERVICE
+    read_only: true
+    tmpfs:
+      - /tmp:noexec,nosuid,size=50m
+    # Ограничение ресурсов
+    deploy:
+      resources:
+        limits:
+          cpus: "0.5"
+          memory: 256M
+        reservations:
+          cpus: "0.1"
+          memory: 64M
 
 volumes:
   postgres_data:
